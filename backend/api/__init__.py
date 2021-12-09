@@ -31,12 +31,13 @@ with app.app_context():
         migrate.init_app(app, db)
 login_manager = LoginManager()
 login_manager.init_app(app)
-
+ma.init_app(app)
+cors.init_app(app)
 """Routes-factory pattern"""
 from api.admin import routes
 from api.circonscription import routes
 from api.electeur import routes
 from api.liste import routes
+from api.vizualizer import map
 
-ma.init_app(app)
-cors.init_app(app)
+

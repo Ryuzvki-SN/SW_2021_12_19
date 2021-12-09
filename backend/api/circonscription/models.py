@@ -8,7 +8,7 @@ class Region(db.Model):
     __tablename__ = 'region'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True, nullable=False)
-    location = db.Column(db.String(255),  default='point((0,0))')
+    location = db.Column(db.String(255),  default='(0,0)')
 
     @aggregated('departements', db.Column(db.Integer))
     def bureaux(self):
@@ -37,7 +37,7 @@ class Departement(db.Model):
     __tablename__ = 'departement'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True, nullable=False)
-    location = db.Column(db.String(255),  default='point((0,0))')
+    location = db.Column(db.String(255),  default='(0,0)')
 
     @aggregated('arrondissements', db.Column(db.Integer))
     def bureaux(self):
@@ -69,7 +69,7 @@ class Arrondissement(db.Model):
     __tablename__ = 'arrondissement'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True, nullable=False)
-    location = db.Column(db.String(255),  default='point((0,0))')
+    location = db.Column(db.String(255),  default='(0,0)')
 
     @aggregated('communes', db.Column(db.Integer))
     def bureaux(self):
@@ -101,7 +101,7 @@ class Commune(db.Model):
     __tablename__ = 'commune'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True, nullable=False)
-    location = db.Column(db.String(255),  default='point((0,0))')
+    location = db.Column(db.String(255),  default='(0,0)')
 
     @aggregated('bureaux', db.Column(db.Integer))
     def total_bureau(self):
@@ -156,6 +156,7 @@ class RegionSchema(ma.SQLAlchemySchema):
     electeurs = ma.auto_field()
     suffrage_valable = ma.auto_field()
     suffrage_invalide = ma.auto_field()
+    departements = ma.auto_field()
 
 
 region_schema = RegionSchema(partial=True)

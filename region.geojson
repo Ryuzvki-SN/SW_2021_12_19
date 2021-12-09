@@ -1,0 +1,201 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          -17.37,
+          14.7688
+        ],
+        "type": "Point"
+      },
+      "id": 1,
+      "properties": {
+        "region": "Dakar"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          -16.0626,
+          14.7701
+        ],
+        "type": "Point"
+      },
+      "id": 2,
+      "properties": {
+        "region": "Diourbel"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          -16.1691,
+          14.1619
+        ],
+        "type": "Point"
+      },
+      "id": 3,
+      "properties": {
+        "region": "Fatick"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          -15.9,
+          14.0473
+        ],
+        "type": "Point"
+      },
+      "id": 4,
+      "properties": {
+        "region": "Kaolack"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          -14.4058,
+          13.1343
+        ],
+        "type": "Point"
+      },
+      "id": 5,
+      "properties": {
+        "region": "Kolda"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          -15.683,
+          15.398
+        ],
+        "type": "Point"
+      },
+      "id": 6,
+      "properties": {
+        "region": "Louga"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          -13.716,
+          15.282
+        ],
+        "type": "Point"
+      },
+      "id": 7,
+      "properties": {
+        "region": "Matam"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          -15.161,
+          16.096
+        ],
+        "type": "Point"
+      },
+      "id": 8,
+      "properties": {
+        "region": "Saint-Louis"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          -13.348,
+          13.873
+        ],
+        "type": "Point"
+      },
+      "id": 9,
+      "properties": {
+        "region": "Tambacounda"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          -16.7046,
+          14.7314
+        ],
+        "type": "Point"
+      },
+      "id": 10,
+      "properties": {
+        "region": "Thies"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          -16.3898,
+          12.7072
+        ],
+        "type": "Point"
+      },
+      "id": 11,
+      "properties": {
+        "region": "Ziguinchor"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          -15.2216,
+          14.2364
+        ],
+        "type": "Point"
+      },
+      "id": 12,
+      "properties": {
+        "region": "Kaffrine"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          -12.293,
+          12.8847
+        ],
+        "type": "Point"
+      },
+      "id": 13,
+      "properties": {
+        "region": "Kedougou"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          -15.5669,
+          12.9084
+        ],
+        "type": "Point"
+      },
+      "id": 14,
+      "properties": {
+        "region": "Sedhiou"
+      },
+      "type": "Feature"
+    }
+  ],
+  "type": "FeatureCollection"
+}
