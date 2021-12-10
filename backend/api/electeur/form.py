@@ -4,8 +4,6 @@ from wtforms import (
     validators, ValidationError
 )
 from flask_wtf import FlaskForm
-from wtforms.validators import InputRequired, Length
-
 from .model import Electeur
 
 
@@ -13,7 +11,7 @@ class ElecteurRegisterForm(FlaskForm):
     firstname = StringField('First Name: ', [validators.DataRequired()])
     lastname = StringField('Last Name: ', [validators.DataRequired()])
     birthday = DateField('Birthday: ', [validators.DataRequired()])
-    cni = IntegerField('CNI: ', [validators.DataRequired()], validators=[InputRequired(), Length(min=13, max=14)])
+    cni = IntegerField('CNI: ', [validators.DataRequired(), validators.Length(min=13, max=14)])
     email = StringField('Email: ', [validators.Email(), validators.DataRequired()])
     password = PasswordField('Password: ', [validators.DataRequired(),
                                             validators.EqualTo('confirm', message=' Both password must match! ')])
