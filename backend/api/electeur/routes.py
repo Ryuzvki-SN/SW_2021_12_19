@@ -1,5 +1,4 @@
 from flask_login import login_user, logout_user
-
 from .form import ElecteurRegisterForm, ElecteurLoginFrom
 from .model import *
 from flask import flash, redirect, url_for, render_template, request
