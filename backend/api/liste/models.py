@@ -36,11 +36,11 @@ class RepresentantSchema(ma.SQLAlchemySchema):
     id = ma.auto_field()
     lastname = ma.auto_field()
     firstname = ma.auto_field()
-    CNI = ma.auto_field()
+    birthday = ma.auto_field()
+    cni = ma.auto_field()
     email = ma.auto_field()
     password = ma.auto_field()
     address = ma.auto_field()
-    birth = ma.auto_field()
 
 
 representant_schema = RepresentantSchema()

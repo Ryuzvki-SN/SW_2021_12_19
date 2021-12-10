@@ -21,3 +21,4 @@ Werkzeug==2.0.1
 
 Shapely~=1.8.0
 geojson~=2.5.0
+WTForms~=3.0.0
