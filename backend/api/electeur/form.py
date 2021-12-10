@@ -4,12 +4,23 @@ from wtforms import (
     validators, ValidationError
 )
 from flask_wtf import FlaskForm
+
 from .model import Electeur
 
 
 class ElecteurRegisterForm(FlaskForm):
-    firstname = StringField('First Name: ', [validators.DataRequired()])
-    lastname = StringField('Last Name: ', [validators.DataRequired()])
+    firstname = StringField('First Name: ', [validators.DataRequired(),
+                                             validators.Length(3, 20, message="Please provide a valid name"),
+                                             validators.Regexp("^[A-Za-z][A-Za-z0-9_.]*$", 0,
+                                                               "Names must have only letters, " "numbers, dots or "
+                                                               "underscores",
+                                                               ), ])
+    lastname = StringField('Last Name: ', [validators.DataRequired(),
+                                           validators.Length(3, 20, message="Please provide a valid name"),
+                                           validators.Regexp("^[A-Za-z][A-Za-z0-9_.]*$", 0,
+                                                             "Names must have only letters, " "numbers, dots or "
+                                                             "underscores",
+                                                             ), ])
     birthday = DateField('Birthday: ', [validators.DataRequired()])
     cni = IntegerField('CNI: ', [validators.DataRequired(), validators.Length(min=13, max=14)])
     email = StringField('Email: ', [validators.Email(), validators.DataRequired()])

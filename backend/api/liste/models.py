@@ -2,13 +2,13 @@ from api import db, ma
 from api.electeur.model import Electeur
 
 
-class Representant(Electeur):
+class Representant(Electeur, db.Model):
     __tablename__ = 'representant'
 
     def __repr__(self):
         return '<Representant %r>' % self.nom
 
-    liste = db.relationship('Liste', backref='representant', uselist=False)
+    liste = db.relationship('Liste', backref='representants', uselist=False)
 
 
 """Class Liste Electorale"""
@@ -25,7 +25,7 @@ class Liste(db.Model):
     def __repr__(self):
         return '<liste %r>' % self.name
 
-    representant_id = db.Column(db.Integer(), db.ForeignKey(Representant.id))  # Foreign key Representant
+    representant = db.Column(db.Integer(), db.ForeignKey(Representant.firstname))  # Foreign key Representant
 
 # Representant
 class RepresentantSchema(ma.SQLAlchemySchema):
