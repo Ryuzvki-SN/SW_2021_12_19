@@ -22,7 +22,7 @@ class ElecteurRegisterForm(FlaskForm):
                                                              "underscores",
                                                              ), ])
     birthday = DateField('Birthday: ', [validators.DataRequired()])
-    cni = IntegerField('CNI: ', [validators.DataRequired(), validators.Length(min=13, max=14)])
+    cni = IntegerField('CNI: ', [validators.InputRequired()])
     email = StringField('Email: ', [validators.Email(), validators.DataRequired()])
     password = PasswordField('Password: ', [validators.DataRequired(),
                                             validators.EqualTo('confirm', message=' Both password must match! ')])
@@ -31,13 +31,11 @@ class ElecteurRegisterForm(FlaskForm):
 
     submit = SubmitField('Electeur')
 
-    @staticmethod
-    def validate_cni(cni):
+    def validate_cni(self, cni):
         if Electeur.query.filter_by(cni=cni.data).first():
             raise ValidationError("This CNI is already in use!")
 
-    @staticmethod
-    def validate_email(email):
+    def validate_email(self, email):
         if Electeur.query.filter_by(email=email.data).first():
             raise ValidationError("This email address is already in use!")
 

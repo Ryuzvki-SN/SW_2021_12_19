@@ -39,5 +39,3 @@ from api.circonscription import routes
 from api.electeur import routes
 from api.liste import routes
 from api.vizualizer import map
-
-

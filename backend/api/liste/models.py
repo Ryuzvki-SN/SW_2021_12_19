@@ -6,9 +6,11 @@ class Representant(Electeur, db.Model):
     __tablename__ = 'representant'
 
     def __repr__(self):
-        return '<Representant %r>' % self.nom
+        return '<Representant %r>' % self.firstname
 
-    liste = db.relationship('Liste', backref='representants', uselist=False)
+    liste = db.relationship('Liste', backref='representant',
+                            primaryjoin='Representant.id == Liste.representant_id',
+                            uselist=False)
 
 
 """Class Liste Electorale"""
@@ -18,6 +20,7 @@ class Liste(db.Model):
     __tablename__ = 'liste'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=False, nullable=False)
+    representant_id = db.Column(db.Integer(), db.ForeignKey(Representant.id))  # Foreign key Representant
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
@@ -25,7 +28,6 @@ class Liste(db.Model):
     def __repr__(self):
         return '<liste %r>' % self.name
 
-    representant = db.Column(db.Integer(), db.ForeignKey(Representant.firstname))  # Foreign key Representant
 
 # Representant
 class RepresentantSchema(ma.SQLAlchemySchema):
@@ -55,7 +57,7 @@ class ListeSchema(ma.SQLAlchemySchema):
 
     id = ma.auto_field()
     name = ma.auto_field()
-    representant = ma.auto_field()
+    representant_id = ma.auto_field()
 
 
 liste_schema = ListeSchema()

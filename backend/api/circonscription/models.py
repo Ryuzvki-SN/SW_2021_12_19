@@ -8,7 +8,7 @@ class Region(db.Model):
     __tablename__ = 'region'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True, nullable=False)
-    location = db.Column(db.String(255),  default='(0,0)')
+    location = db.Column(db.String(255), default='(0,0)')
 
     @aggregated('departements', db.Column(db.Integer))
     def bureaux(self):
@@ -37,7 +37,7 @@ class Departement(db.Model):
     __tablename__ = 'departement'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True, nullable=False)
-    location = db.Column(db.String(255),  default='(0,0)')
+    location = db.Column(db.String(255), default='(0,0)')
 
     @aggregated('arrondissements', db.Column(db.Integer))
     def bureaux(self):
@@ -59,7 +59,8 @@ class Departement(db.Model):
         return '<Departement %r>' % self.name
 
     region_id = db.Column(db.Integer, db.ForeignKey(Region.id), nullable=False)
-    region = db.relationship('Region', backref=db.backref('departements', lazy=True))
+    region = db.relationship('Region', backref=db.backref('departements', lazy=True),
+                             primaryjoin='Region.id == Departement.region_id')
 
 
 """Class Arrondissement"""
@@ -69,7 +70,10 @@ class Arrondissement(db.Model):
     __tablename__ = 'arrondissement'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True, nullable=False)
-    location = db.Column(db.String(255),  default='(0,0)')
+    location = db.Column(db.String(255), default='(0,0)')
+    departement_id = db.Column(db.Integer, db.ForeignKey(Departement.id), nullable=False)
+    departement = db.relationship('Departement', backref=db.backref('arrondissements', lazy=True),
+                                  primaryjoin='Departement.id == Arrondissement.departement_id')
 
     @aggregated('communes', db.Column(db.Integer))
     def bureaux(self):
@@ -90,9 +94,6 @@ class Arrondissement(db.Model):
     def __repr__(self):
         return '<Arrondissement %r>' % self.nom
 
-    departement_id = db.Column(db.Integer, db.ForeignKey(Departement.id), nullable=False)
-    departement = db.relationship('Departement', backref=db.backref('arrondissements', lazy=True))
-
 
 """Class Commune"""
 
@@ -101,7 +102,10 @@ class Commune(db.Model):
     __tablename__ = 'commune'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True, nullable=False)
-    location = db.Column(db.String(255),  default='(0,0)')
+    location = db.Column(db.String(255), default='(0,0)')
+    arrondissement_id = db.Column(db.Integer, db.ForeignKey(Arrondissement.id), nullable=False)
+    arrondissement = db.relationship('Arrondissement', backref=db.backref('communes', lazy=True),
+                                     primaryjoin='Arrondissement.id == Commune.arrondissement_id')
 
     @aggregated('bureaux', db.Column(db.Integer))
     def total_bureau(self):
@@ -122,9 +126,6 @@ class Commune(db.Model):
     def __repr__(self):
         return '<Commune %r>' % self.name
 
-    arrondissement_id = db.Column(db.Integer, db.ForeignKey(Arrondissement.id), nullable=False)
-    arrondissement = db.relationship('Arrondissement', backref=db.backref('communes', lazy=True))
-
 
 """Class Bureau de vote"""
 
@@ -135,12 +136,12 @@ class Bureau(db.Model):
     nombre_inscrit = db.Column(db.Integer, nullable=False)
     suffrage_valable = db.Column(db.Integer, nullable=True)
     suffrage_invalide = db.Column(db.Integer, nullable=True)
+    commune_id = db.Column(db.Integer, db.ForeignKey(Commune.id), nullable=False)
+    commune = db.relationship('Commune', backref=db.backref('bureaux', lazy=True),
+                              primaryjoin='Commune.id == Bureau.commune_id')
 
     def __repr__(self):
         return '<Bureau %r>' % self.name
-
-    commune_id = db.Column(db.Integer, db.ForeignKey(Commune.id), nullable=False)
-    commune = db.relationship('Commune', backref=db.backref('bureaux', lazy=True))
 
 
 # Generate marshmallow Schemas from models
@@ -156,7 +157,6 @@ class RegionSchema(ma.SQLAlchemySchema):
     electeurs = ma.auto_field()
     suffrage_valable = ma.auto_field()
     suffrage_invalide = ma.auto_field()
-    departements = ma.auto_field()
 
 
 region_schema = RegionSchema(partial=True)
