@@ -1,15 +1,12 @@
 from datetime import datetime
 from flask_login import UserMixin
-from api import db, ma, login_manager
-
-@login_manager.user_loader
-def user_loader(user_id):
-    return Electeur.query.get(user_id)
+from api import db, ma
 
 
 class Electeur(db.Model, UserMixin):
     __tablename__ = 'electeur'
     id = db.Column(db.Integer, primary_key=True)
+    public_id = db.Column(db.String(50), unique=True)
     lastname = db.Column(db.String(75), unique=False)
     firstname = db.Column(db.String(75), unique=False)
     birthday = db.Column(db.Date)
@@ -17,8 +14,6 @@ class Electeur(db.Model, UserMixin):
     email = db.Column(db.String(64), unique=True, nullable=False)
     password = db.Column(db.String(200), unique=False)
     address = db.Column(db.String(50), unique=False)
-    # bureau_number = db.Column(db.Integer, db.ForeignKey(Bureau.id), nullable=False)
-    # bureau = db.relationship('Bureau', backref=db.backref('electeurs', lazy=True))
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     date_modified = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -33,6 +28,7 @@ class ElecteurSchema(ma.SQLAlchemySchema):
         include_fk = True
 
     id = ma.auto_field()
+    public_id = ma.auto_field()
     lastname = ma.auto_field()
     firstname = ma.auto_field()
     birthday = ma.auto_field()

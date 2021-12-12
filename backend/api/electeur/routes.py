@@ -1,63 +1,126 @@
 import datetime
+import timedelta
+import uuid
+from functools import wraps
 
-from flask_login import login_user, logout_user, login_required
+import jwt
+from flask import request, jsonify, make_response
+
+from api import bcrypt, app
 from .model import *
-from flask import flash, request, jsonify
-from api import db, bcrypt, app
 
 
-@login_manager.user_loader
-def load_user(user_id):
-    return Electeur.query.get(int(user_id))
+# decorator for verifying the JWT
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.args.get('token')  # http://127.0.0.1:5000/api/electeur?token
+        # =eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
+        # .eyJwdWJsaWNfaWQiOiJkNmQ2OTlmMC0yM2YzLTQ3NGEtOGZmNi05ODJkNGFjMDM4ZmEiLCJleHAiOjE2MzkzMTA5OTN9
+        # .gU244rqYqsMAxemY17Az58iNPmgIFMqAAkwf8wAulH4
+
+        # jwt is passed in the request header
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token']
+        # return 401 if token is not passed
+        if not token:
+            return jsonify({'message': 'Token is missing !!'}), 401
+
+        try:
+            # decoding the payload to fetch the stored details
+            data = jwt.decode(token, app.config['SECRET_KEY'])
+            current_user = Electeur.query.filter_by(public_id=data['public_id']).first()
+        except (Exception,):
+            return jsonify({
+                'message': 'Token is invalid !!'
+            }), 401
+        # returns the current logged in users contex to the routes
+        return f(current_user, *args, **kwargs)
+
+    return decorated
 
 
-@app.route('/electeur/register', methods=["POST"], strict_slashes=False)
-def register():
+@app.route('/api/electeur', methods=['GET'], strict_slashes=False)
+@token_required
+def get_electeurs(current_user):
+    users = db.session.query(Electeur).all()
+    results = electeurs_schema.dump(users)
+    db.session.close()
+    return jsonify(results), 200
+
+
+@app.route('/api/electeur/login', methods=['POST'], strict_slashes=False)
+def login():
+    # creates dictionary of form data
+    auth = request.form
+
+    if not auth or not auth.get('cni') or not auth.get('password'):
+        # returns 401 if any cni or / and password is missing
+        return make_response(
+            'Could not verify',
+            401,
+            {'WWW-Authenticate': 'Basic realm ="Login required !!"'}
+        )
+
+    user = Electeur.query.filter_by(cni=auth.get('cni')).first()
+
+    if not user:
+        # returns 401 if user does not exist
+        return make_response(
+            'Could not verify',
+            401,
+            {'WWW-Authenticate': 'Basic realm ="User does not exist !!"'}
+        )
+
+    if bcrypt.check_password_hash(user.password, auth.get('password')):
+        # generates the JWT Token
+        token = jwt.encode({
+            'public_id': user.public_id,
+            'exp': datetime.utcnow() + timedelta.Timedelta(minutes=30)
+        }, app.config['SECRET_KEY'])
+        return make_response(jsonify({'token': token.decode('UTF-8')}), 201)
+    # returns 403 if password is wrong
+    return make_response(
+        'Could not verify',
+        403,
+        {'WWW-Authenticate': 'Basic realm ="Wrong Password !!"'}
+    )
+
+
+# signup route
+@app.route('/api/electeur/register', methods=["POST"], strict_slashes=False)
+def signup():
+    # creates a dictionary of the form data
     data = request.get_json()
+
     hash_password = bcrypt.generate_password_hash(data['password'])
-    birth = datetime.strptime(data['birthday'], '%Y-%m-%d')
+    birth_format = datetime.strptime(data['birthday'], '%Y-%m-%d')
     lastname = data['lastname']
     firstname = data['firstname']
-    birthday = birth
+    birthday = birth_format
     cni = data['cni']
     email = data['email']
     password = hash_password
     address = data['address']
-    electeur = Electeur(lastname=lastname, firstname=firstname,
-                        birthday=birthday, cni=cni, email=email,
-                        password=password, address=address)
-    # Add user to the database
-    db.session.add(electeur)
-    flash('Thank you for registering', 'success')  # Save
-    db.session.commit()
-    # Show a success message
-    flash("Account Succesfully created", "success")
 
-    return electeur_schema.jsonify(electeur)
+    # checking for existing user
+    user = Electeur.query.filter_by(cni=cni).first()
+    if not user:
+        # database ORM object
+        user = Electeur(
+            public_id=str(uuid.uuid4()),
+            lastname=lastname, firstname=firstname,
+            birthday=birthday,  # datetime.strptime(birthday, '%Y-%m-%d'),
+            cni=cni,
+            email=email,
+            password=password,
+            address=address
+        )
+        # insert user
+        db.session.add(user)
+        db.session.commit()
 
-
-@app.route('/electeur/login', methods=['GET', 'POST'])
-def login():
-    if request.method == "POST":
-        try:
-            # get the user that exists with the submitted email
-            user = Electeur.query.filter_by(cni=Electeur.cni).first()
-            # check if the user given email matches the password
-            # that is stored for that email
-            if user and bcrypt.check_password_hash(user.password, Electeur.password):
-                # login the user
-                login_user(user)
-                # Redirect to the user account
-                flash('You are login now!', 'success')
-            else:
-                flash("Invalid cni or password!", "danger")
-        except (Exception,):
-            flash("Invalid cni or password!", "danger")
-
-    return jsonify({'message': 'success'})
-
-
-@app.route('/electeur/logout')
-@login_required
-def logout():
-    logout_user()
+        return make_response('Successfully registered.', 201)
+    else:
+        # returns 202 if user already exists
+        return make_response('User already exists. Please Log in.', 202)
