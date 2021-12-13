@@ -1,8 +1,6 @@
 from sqlalchemy_utils import aggregated
 from api import db, ma
 
-"""Class Region"""
-
 
 class Region(db.Model):
     __tablename__ = 'region'
@@ -10,30 +8,21 @@ class Region(db.Model):
     name = db.Column(db.String(255), unique=True, nullable=False)
     location = db.Column(db.String(255), default='(0,0)')
 
-    @aggregated('departements', db.Column(db.Integer))
+    @aggregated('departements.arrondissements.communes.bureaux', db.Column(db.Integer))
     def bureaux(self):
-        return db.func.sum(Departement.bureaux)
+        return db.func.count(Bureau.id)
 
-    @aggregated('departements', db.Column(db.Integer))
+    @aggregated('departements.arrondissements.communes.bureaux', db.Column(db.Integer))
     def electeurs(self):
-        return db.func.sum(Departement.electeurs)
+        return db.func.count(Bureau.electeurs)
 
-    @aggregated('departements', db.Column(db.Integer))
+    @aggregated('departements.arrondissements.communes.bureaux', db.Column(db.Integer))
     def suffrage_valable(self):
-        return db.func.sum(Departement.suffrage_valable)
+        return db.func.sum(Bureau.suffrage_valable)
 
-    @aggregated('departements', db.Column(db.Integer))
+    @aggregated('departements.arrondissements.communes.bureaux', db.Column(db.Integer))
     def suffrage_invalide(self):
-        return db.func.sum(Departement.suffrage_invalide)
-
-    def __init__(self, id, name, location, bureaux, electeurs, suffrage_valable, suffrage_invalide):
-        self.id = id
-        self.name = name
-        self.location = location
-        self.bureaux = bureaux
-        self.electeurs = electeurs
-        self.suffrage_valable = suffrage_valable
-        self.suffrage_invalide = suffrage_invalide
+        return db.func.sum(Bureau.suffrage_invalide)
 
     def __repr__(self):
         return '<Region %r>' % self.name
@@ -48,31 +37,21 @@ class Departement(db.Model):
     region = db.relationship('Region', backref=db.backref('departements', lazy=True),
                              primaryjoin='Region.id == Departement.region_id')
 
-    @aggregated('arrondissements', db.Column(db.Integer))
+    @aggregated('arrondissements.communes.bureaux', db.Column(db.Integer))
     def bureaux(self):
-        return db.func.sum(Arrondissement.bureaux)
+        return db.func.count(Bureau.id)
 
-    @aggregated('arrondissements', db.Column(db.Integer))
+    @aggregated('arrondissements.communes.bureaux', db.Column(db.Integer))
     def electeurs(self):
-        return db.func.sum(Arrondissement.electeurs)
+        return db.func.count(Bureau.electeurs)
 
-    @aggregated('arrondissements', db.Column(db.Integer))
+    @aggregated('arrondissements.communes.bureaux', db.Column(db.Integer))
     def suffrage_valable(self):
-        return db.func.sum(Arrondissement.suffrage_valable)
+        return db.func.sum(Bureau.suffrage_valable)
 
-    @aggregated('arrondissements', db.Column(db.Integer))
+    @aggregated('arrondissements.communes.bureaux', db.Column(db.Integer))
     def suffrage_invalide(self):
-        return db.func.sum(Arrondissement.suffrage_invalide)
-
-    def __init__(self, id, name, region, location, bureaux, electeurs, suffrage_valable, suffrage_invalide):
-        self.id = id
-        self.name = name
-        self.region = region
-        self.location = location
-        self.bureaux = bureaux
-        self.electeurs = electeurs
-        self.suffrage_valable = suffrage_valable
-        self.suffrage_invalide = suffrage_invalide
+        return db.func.sum(Bureau.suffrage_invalide)
 
     def __repr__(self):
         return '<Departement %r>' % self.name
@@ -87,31 +66,21 @@ class Arrondissement(db.Model):
     departement = db.relationship('Departement', backref=db.backref('arrondissements', lazy=True),
                                   primaryjoin='Departement.id == Arrondissement.departement_id')
 
-    @aggregated('communes', db.Column(db.Integer))
+    @aggregated('communes.bureaux', db.Column(db.Integer))
     def bureaux(self):
-        return db.func.sum(Commune.total_bureau)
+        return db.func.count(Bureau.id)
 
-    @aggregated('communes', db.Column(db.Integer))
+    @aggregated('communes.bureaux', db.Column(db.Integer))
     def electeurs(self):
-        return db.func.sum(Commune.electeurs)
+        return db.func.count(Bureau.electeurs)
 
-    @aggregated('communes', db.Column(db.Integer))
+    @aggregated('communes.bureaux', db.Column(db.Integer))
     def suffrage_valable(self):
-        return db.func.sum(Commune.suffrage_valable)
+        return db.func.sum(Bureau.suffrage_valable)
 
-    @aggregated('communes', db.Column(db.Integer))
+    @aggregated('communes.bureaux', db.Column(db.Integer))
     def suffrage_invalide(self):
-        return db.func.sum(Commune.suffrage_invalide)
-
-    def __init__(self, id, name, departement, location, bureaux, electeurs, suffrage_valable, suffrage_invalide):
-        self.id = id
-        self.name = name
-        self.departement = departement
-        self.location = location
-        self.bureaux = bureaux
-        self.electeurs = electeurs
-        self.suffrage_valable = suffrage_valable
-        self.suffrage_invalide = suffrage_invalide
+        return db.func.sum(Bureau.suffrage_invalide)
 
     def __repr__(self):
         return '<Arrondissement %r>' % self.name
@@ -135,7 +104,7 @@ class Commune(db.Model):
 
     @aggregated('bureaux', db.Column(db.Integer))
     def electeurs(self):
-        return db.func.sum(Bureau.nombre_inscrit)
+        return db.func.count(Bureau.electeurs)
 
     @aggregated('bureaux', db.Column(db.Integer))
     def suffrage_valable(self):
@@ -145,28 +114,14 @@ class Commune(db.Model):
     def suffrage_invalide(self):
         return db.func.sum(Bureau.suffrage_invalide)
 
-    def __init__(self, id, name, arrondissement, location, total_bureau,
-                 electeurs, suffrage_valable, suffrage_invalide):
-        self.id = id
-        self.name = name
-        self.arrondissement = arrondissement
-        self.location = location
-        self.total_bureau = total_bureau
-        self.electeurs = electeurs
-        self.suffrage_valable = suffrage_valable
-        self.suffrage_invalide = suffrage_invalide
-
     def __repr__(self):
         return '<Commune %r>' % self.name
-
-
-"""Class Bureau de vote"""
 
 
 class Bureau(db.Model):
     __tablename__ = 'bureau'
     id = db.Column(db.Integer, primary_key=True)
-    nombre_inscrit = db.Column(db.Integer, nullable=False)
+    electeurs = db.Column(db.Integer, nullable=True)
     suffrage_valable = db.Column(db.Integer, nullable=True)
     suffrage_invalide = db.Column(db.Integer, nullable=True)
     commune_id = db.Column(db.Integer, db.ForeignKey(Commune.id), nullable=False)
@@ -263,7 +218,7 @@ class BureauSchema(ma.SQLAlchemySchema):
         include_fk = True
 
     id = ma.auto_field()
-    nombre_inscrit = ma.auto_field()
+    electeurs = ma.auto_field()
     suffrage_valable = ma.auto_field()
     suffrage_invalide = ma.auto_field()
     commune_id = ma.auto_field()

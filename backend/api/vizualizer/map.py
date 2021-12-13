@@ -2,7 +2,8 @@ from flask import jsonify
 from geojson import Point, Feature, FeatureCollection
 
 from api import app, db
-from api.circonscription.models import Region, regions_schema, Departement, Arrondissement, departements_schema, \
+from api.circonscription.models import Region, regions_schema, \
+    Departement, Arrondissement, departements_schema, \
     Commune, arrondissements_schema, communes_schema
 
 

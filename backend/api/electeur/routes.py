@@ -102,6 +102,8 @@ def signup():
     email = data['email']
     password = hash_password
     address = data['address']
+    bureau = data['bureau_id']
+    commune = data['commune_id']
 
     # checking for existing user
     user = Electeur.query.filter_by(cni=cni).first()
@@ -114,7 +116,9 @@ def signup():
             cni=cni,
             email=email,
             password=password,
-            address=address
+            address=address,
+            bureau_id=bureau,
+            commune_id=commune
         )
         # insert user
         db.session.add(user)
