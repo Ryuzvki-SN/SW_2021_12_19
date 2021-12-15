@@ -32,7 +32,9 @@ with app.app_context():
 
 """Routes-factory pattern"""
 from api.circonscription import routes
-from api.electeur import routes
-from api.part import routes
+from api.election import routes
+from api.elector import routes
+from api.party import routes
+from api.candidate import routes
 from api.vizualizer import map
 

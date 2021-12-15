@@ -1,7 +1,6 @@
 from sqlalchemy_utils import aggregated
 from api import db, ma
 
-
 class Region(db.Model):
     __tablename__ = 'region'
     id = db.Column(db.Integer, primary_key=True)
@@ -14,7 +13,7 @@ class Region(db.Model):
 
     @aggregated('departements.arrondissements.communes.bureaux', db.Column(db.Integer))
     def electeurs(self):
-        return db.func.count(Bureau.electeurs)
+        return db.func.sum(Bureau.electeurs)
 
     @aggregated('departements.arrondissements.communes.bureaux', db.Column(db.Integer))
     def suffrage_valable(self):
@@ -33,7 +32,8 @@ class Departement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True, nullable=False)
     location = db.Column(db.String(255), default='(0,0)')
-    region_id = db.Column(db.Integer, db.ForeignKey(Region.id), nullable=False)
+    region_id = db.Column(db.Integer, db.ForeignKey(Region.id, ondelete='CASCADE',
+                                                    onupdate='CASCADE'), nullable=False)
     region = db.relationship('Region', backref=db.backref('departements', lazy=True),
                              primaryjoin='Region.id == Departement.region_id')
 
@@ -43,7 +43,7 @@ class Departement(db.Model):
 
     @aggregated('arrondissements.communes.bureaux', db.Column(db.Integer))
     def electeurs(self):
-        return db.func.count(Bureau.electeurs)
+        return db.func.sum(Bureau.electeurs)
 
     @aggregated('arrondissements.communes.bureaux', db.Column(db.Integer))
     def suffrage_valable(self):
@@ -62,7 +62,8 @@ class Arrondissement(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True, nullable=False)
     location = db.Column(db.String(255), default='(0,0)')
-    departement_id = db.Column(db.Integer, db.ForeignKey(Departement.id), nullable=False)
+    departement_id = db.Column(db.Integer, db.ForeignKey(Departement.id, ondelete='CASCADE',
+                                                         onupdate='CASCADE'), nullable=False)
     departement = db.relationship('Departement', backref=db.backref('arrondissements', lazy=True),
                                   primaryjoin='Departement.id == Arrondissement.departement_id')
 
@@ -72,7 +73,7 @@ class Arrondissement(db.Model):
 
     @aggregated('communes.bureaux', db.Column(db.Integer))
     def electeurs(self):
-        return db.func.count(Bureau.electeurs)
+        return db.func.sum(Bureau.electeurs)
 
     @aggregated('communes.bureaux', db.Column(db.Integer))
     def suffrage_valable(self):
@@ -94,17 +95,20 @@ class Commune(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True, nullable=False)
     location = db.Column(db.String(255), default='(0,0)')
-    arrondissement_id = db.Column(db.Integer, db.ForeignKey(Arrondissement.id), nullable=False)
+    arrondissement_id = db.Column(db.Integer, db.ForeignKey(Arrondissement.id, ondelete='CASCADE',
+                                                            onupdate='CASCADE'), nullable=False)
     arrondissement = db.relationship('Arrondissement', backref=db.backref('communes', lazy=True),
                                      primaryjoin='Arrondissement.id == Commune.arrondissement_id')
 
-    @aggregated('bureaux', db.Column(db.Integer))
+    @aggregated('bureaux.electors', db.Column(db.Integer))
     def total_bureau(self):
-        return db.func.count(Bureau.id)
+        from api.elector.model import Elector
+        return db.func.count(Elector.bureau_id)
 
-    @aggregated('bureaux', db.Column(db.Integer))
+    @aggregated('electors', db.Column(db.Integer))
     def electeurs(self):
-        return db.func.count(Bureau.electeurs)
+        from api.elector.model import Elector
+        return db.func.count(Elector.id)
 
     @aggregated('bureaux', db.Column(db.Integer))
     def suffrage_valable(self):
@@ -121,15 +125,19 @@ class Commune(db.Model):
 class Bureau(db.Model):
     __tablename__ = 'bureau'
     id = db.Column(db.Integer, primary_key=True)
-    electeurs = db.Column(db.Integer, nullable=True)
     suffrage_valable = db.Column(db.Integer, nullable=True)
     suffrage_invalide = db.Column(db.Integer, nullable=True)
-    commune_id = db.Column(db.Integer, db.ForeignKey(Commune.id), nullable=False)
-    commune = db.relationship('Commune', backref=db.backref('bureaux', lazy=True),
+    commune_id = db.Column(db.Integer, db.ForeignKey(Commune.id, ondelete='CASCADE',
+                                                     onupdate='CASCADE'), nullable=False)
+    commune = db.relationship('Commune', backref=db.backref('bureaux', cascade='all,save-update,delete'),
                               primaryjoin='Commune.id == Bureau.commune_id')
 
-    def __repr__(self):
-        return '<Bureau %r>' % self.name
+    @aggregated('electors', db.Column(db.Integer))
+    def electeurs(self):
+        from api.elector.model import Elector
+        # return db.func.count(Elector.id)
+        results = db.session.query(Elector, Bureau).filter(Bureau.id == Elector.bureau_id).all()
+        return db.func.count(results)
 
 
 # Generate marshmallow Schemas from models

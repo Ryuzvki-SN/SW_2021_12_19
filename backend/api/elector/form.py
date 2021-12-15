@@ -5,7 +5,7 @@ from wtforms import (
 )
 from flask_wtf import FlaskForm
 
-from .model import Electeur
+from .model import Elector
 
 
 class ElecteurRegisterForm(FlaskForm):
@@ -32,11 +32,11 @@ class ElecteurRegisterForm(FlaskForm):
     submit = SubmitField('Electeur')
 
     def validate_cni(self, cni):
-        if Electeur.query.filter_by(cni=cni.data).first():
+        if Elector.query.filter_by(cni=cni.data).first():
             raise ValidationError("This CNI is already in use!")
 
     def validate_email(self, email):
-        if Electeur.query.filter_by(email=email.data).first():
+        if Elector.query.filter_by(email=email.data).first():
             raise ValidationError("This email address is already in use!")
 
 

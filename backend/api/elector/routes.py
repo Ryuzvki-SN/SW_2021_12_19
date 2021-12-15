@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import timedelta
 import uuid
 from functools import wraps
@@ -29,7 +29,7 @@ def token_required(f):
         try:
             # decoding the payload to fetch the stored details
             data = jwt.decode(token, app.config['SECRET_KEY'])
-            current_user = Electeur.query.filter_by(public_id=data['public_id']).first()
+            current_user = Elector.query.filter_by(public_id=data['public_id']).first()
         except (Exception,):
             return jsonify({
                 'message': 'Token is invalid !!'
@@ -40,16 +40,16 @@ def token_required(f):
     return decorated
 
 
-@app.route('/api/electeur', methods=['GET'], strict_slashes=False)
+@app.route('/api/elector', methods=['GET'], strict_slashes=False)
 @token_required
-def get_electeurs(current_user):
-    users = db.session.query(Electeur).all()
-    results = electeurs_schema.dump(users)
+def electors(current_user):
+    users = db.session.query(Elector).all()
+    results = electors_schema.dump(users)
     db.session.close()
     return jsonify(results), 200
 
 
-@app.route('/api/electeur/login', methods=['POST'], strict_slashes=False)
+@app.route('/api/elector/login', methods=['POST'], strict_slashes=False)
 def login():
     # creates dictionary of form data
     auth = request.form
@@ -62,7 +62,7 @@ def login():
             {'WWW-Authenticate': 'Basic realm ="Login required !!"'}
         )
 
-    user = Electeur.query.filter_by(cni=auth.get('cni')).first()
+    user = Elector.query.filter_by(cni=auth.get('cni')).first()
 
     if not user:
         # returns 401 if user does not exist
@@ -88,7 +88,7 @@ def login():
 
 
 # signup route
-@app.route('/api/electeur/register', methods=["POST"], strict_slashes=False)
+@app.route('/api/elector/register', methods=["POST"], strict_slashes=False)
 def signup():
     # creates a dictionary of the form data
     data = request.get_json()
@@ -106,13 +106,13 @@ def signup():
     commune = data['commune_id']
 
     # checking for existing user
-    user = Electeur.query.filter_by(cni=cni).first()
+    user = Elector.query.filter_by(cni=cni).first()
     if not user:
         # database ORM object
-        user = Electeur(
+        user = Elector(
             public_id=str(uuid.uuid4()),
             lastname=lastname, firstname=firstname,
-            birthday=birthday,  # datetime.strptime(birthday, '%Y-%m-%d'),
+            birthday=birthday,
             cni=cni,
             email=email,
             password=password,
