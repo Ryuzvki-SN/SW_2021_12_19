@@ -93,13 +93,10 @@ def bureau(id):
 def update_bureau(id):
     data = request.get_json()
     br = Bureau.query.get(id)
-    # results = db.session.execute("SELECT COUNT(*) FROM elector a "
-    #                              "inner join bureau b on b.id = a.bureau_id WHERE bureau_id = '%s';" % br.id)
-    # electeurs = results.fetchall()[0][0]
 
     if not br:
         return jsonify({"message": "No bureau found!"}), 404
-    br.electeurs = db.session.query(Elector, Bureau).filter(Bureau.id == Elector.bureau_id).count()
+    br.electeurs = db.func.count(Elector.id)
     br.suffrage_valable = data['suffrage_valable']
     br.suffrage_invalide = data['suffrage_invalide']
     if (br.suffrage_valable + br.suffrage_invalide) != br.electeurs:

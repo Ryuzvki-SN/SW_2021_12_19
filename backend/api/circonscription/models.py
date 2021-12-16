@@ -135,9 +135,9 @@ class Bureau(db.Model):
     @aggregated('electors', db.Column(db.Integer))
     def electeurs(self):
         from api.elector.model import Elector
-        # return db.func.count(Elector.id)
-        results = db.session.query(Elector, Bureau).filter(Bureau.id == Elector.bureau_id).all()
-        return db.func.count(results)
+        return db.func.count(Elector.id)
+        # results = db.session.query(Elector, Bureau).filter(Bureau.id == Elector.bureau_id).all()
+        # return db.func.count(results)
 
 
 # Generate marshmallow Schemas from models
