@@ -1,7 +1,6 @@
 from .models import *
 from flask import jsonify, request
 from api import app, db
-from api.elector.model import Elector
 
 # Define a route to fetch the avaialable Regions
 
@@ -96,11 +95,9 @@ def update_bureau(id):
 
     if not br:
         return jsonify({"message": "No bureau found!"}), 404
-    br.electeurs = db.func.count(Elector.id)
     br.suffrage_valable = data['suffrage_valable']
     br.suffrage_invalide = data['suffrage_invalide']
     if (br.suffrage_valable + br.suffrage_invalide) != br.electeurs:
         return jsonify({"message": "sum suffrage different de nombre inscrit!"}), 404
-    br.commune_id = data['commune_id']
     db.session.commit()
     return bureau_schema.jsonify(br), 200
