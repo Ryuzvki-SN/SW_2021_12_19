@@ -100,15 +100,13 @@ class Commune(db.Model):
     arrondissement = db.relationship('Arrondissement', backref=db.backref('communes', lazy=True),
                                      primaryjoin='Arrondissement.id == Commune.arrondissement_id')
 
-    @aggregated('bureaux.electors', db.Column(db.Integer))
+    @aggregated('bureaux', db.Column(db.Integer))
     def total_bureau(self):
-        from api.elector.model import Elector
-        return db.func.count(Elector.bureau_id)
+        return db.func.count(Bureau.id)
 
-    @aggregated('electors', db.Column(db.Integer))
+    @aggregated('bureaux', db.Column(db.Integer))
     def electeurs(self):
-        from api.elector.model import Elector
-        return db.func.count(Elector.id)
+        return db.func.sum(Bureau.electeurs)
 
     @aggregated('bureaux', db.Column(db.Integer))
     def suffrage_valable(self):
