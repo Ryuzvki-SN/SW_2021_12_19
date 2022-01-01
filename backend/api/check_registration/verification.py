@@ -13,7 +13,7 @@ def verification(cni):
     if not user:
         # returns 401 if user does not exist
         return make_response(
-            'Could not verify',
+            'User does not exist !!',
             401,
             {'WWW-Authenticate': 'Basic realm ="User does not exist !!"'}
         )

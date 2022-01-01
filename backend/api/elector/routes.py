@@ -57,7 +57,7 @@ def login():
     if not auth or not auth.get('cni') or not auth.get('password'):
         # returns 401 if any cni or / and password is missing
         return make_response(
-            'Could not verify',
+            'Login required !!',
             401,
             {'WWW-Authenticate': 'Basic realm ="Login required !!"'}
         )
@@ -67,7 +67,7 @@ def login():
     if not user:
         # returns 401 if user does not exist
         return make_response(
-            'Could not verify',
+            'User does not exist !!',
             401,
             {'WWW-Authenticate': 'Basic realm ="User does not exist !!"'}
         )
@@ -81,7 +81,7 @@ def login():
         return make_response(jsonify({'token': token.decode('UTF-8')}), 201)
     # returns 403 if password is wrong
     return make_response(
-        'Could not verify',
+        'Wrong Password !!',
         403,
         {'WWW-Authenticate': 'Basic realm ="Wrong Password !!"'}
     )
