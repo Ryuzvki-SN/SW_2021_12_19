@@ -37,4 +37,5 @@ from api.elector import routes
 from api.party import routes
 from api.candidate import routes
 from api.vizualizer import map
+from api.check_registration import verification
 
