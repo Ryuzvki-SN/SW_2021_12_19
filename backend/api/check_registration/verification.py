@@ -7,7 +7,7 @@ from api.elector.model import Elector, elector_schema
 
 @app.route("/api/verification/<cni>", methods=["GET"], strict_slashes=False)
 def verification(cni):
-    checked = []
+    circonscription = []
     user = Elector.query.filter_by(cni=cni).first()
 
     if not user:
@@ -18,9 +18,9 @@ def verification(cni):
             {'WWW-Authenticate': 'Basic realm ="User does not exist !!"'}
         )
 
-    bureau = db.session.query(Elector)\
+    elector_query = db.session.query(Elector)\
         .filter_by(cni=cni).first()
-    br_serializer = elector_schema.dump(bureau)
+    elector = elector_schema.dump(elector_query)
 
     commune = db.session.query(Commune).join(Elector)\
         .filter(Commune.id == Elector.commune_id).first()
@@ -44,14 +44,14 @@ def verification(cni):
         .filter(Commune.id == Elector.commune_id).first()
     city_serializer = region_schema.dump(region)
 
-    checked.append(
+    circonscription.append(
         {
             "Region": city_serializer['name'],   # str(region)
             "Departement": dep_serializer['name'],   # str(departement)
             "Arrondissement": arron_serializer['name'],  # str(arrondissement)
             "Commune": com_serializer['name'],  # str(commune)
-            "Adresse": br_serializer['address'],  # str(bureau)
-            "Bureau": br_serializer['bureau_id']  # str(bureau)
+            "Adresse": elector['address'],  # str(bureau)
+            "Bureau": elector['bureau_id']  # str(bureau)
         }
     )
-    return jsonify(checked), 200
+    return jsonify(circonscription), 200

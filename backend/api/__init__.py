@@ -38,4 +38,4 @@ from api.party import routes
 from api.candidate import routes
 from api.vizualizer import map
 from api.check_registration import verification
-
+from api.bureau_change_request import changement
